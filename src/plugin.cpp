@@ -14,6 +14,30 @@ void ExecuteConsoleCommand(const std::string& command, RE::TESObjectREFR* target
 	}
 }
 
+bool IsSafeToOpenMenu()
+{
+	auto* ui = RE::UI::GetSingleton();
+	if (!ui) {
+		return false;
+	}
+
+	if (ui->GameIsPaused()) {
+		return false;
+	}
+
+	if (ui->IsMenuOpen(RE::InventoryMenu::MENU_NAME) ||
+		ui->IsMenuOpen(RE::CraftingMenu::MENU_NAME) ||
+		ui->IsMenuOpen(RE::MapMenu::MENU_NAME) ||
+		ui->IsMenuOpen(RE::JournalMenu::MENU_NAME) ||
+		ui->IsMenuOpen(RE::DialogueMenu::MENU_NAME) ||
+		ui->IsMenuOpen(RE::Console::MENU_NAME) ||
+		ui->IsMenuOpen(RE::LoadingMenu::MENU_NAME)) {
+		return false;
+	}
+
+	return true;
+}
+
 RE::TESObjectREFR* GetEnchanterRef()
 {
 	// Dragonsreach CraftingEnchantingWorkbench
@@ -46,7 +70,7 @@ public:
 				continue;
 			}
 
-			if (button->GetIDCode() == iKeyOpen) {
+			if (button->GetIDCode() == iKeyOpen && IsSafeToOpenMenu()) {
 				if (const auto targetRef = GetEnchanterRef()) {
 					ExecuteConsoleCommand("Activate player", targetRef);
 				}
